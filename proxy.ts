@@ -11,21 +11,25 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth;
   const role = req.auth?.user?.role;
 
-  const isAdminRoute = nextUrl.pathname.startsWith("/admin");
+  const isAdminLoginRoute = nextUrl.pathname === "/admin/login";
+  const isAdminRoute = nextUrl.pathname.startsWith("/admin") && !isAdminLoginRoute;
   const isAccountRoute = nextUrl.pathname.startsWith("/account");
 
-  if (isAdminRoute) {
-    const isStaff =
-      role === "SUPER_ADMIN" ||
-      role === "ADMIN" ||
-      role === "PRODUCT_MANAGER" ||
-      role === "ORDER_MANAGER" ||
-      role === "CONTENT_MANAGER";
-    if (!isLoggedIn || !isStaff) {
-      const loginUrl = new URL("/admin/login", nextUrl);
-      loginUrl.searchParams.set("callbackUrl", nextUrl.pathname);
-      return NextResponse.redirect(loginUrl);
-    }
+  const isStaff =
+    role === "SUPER_ADMIN" ||
+    role === "ADMIN" ||
+    role === "PRODUCT_MANAGER" ||
+    role === "ORDER_MANAGER" ||
+    role === "CONTENT_MANAGER";
+
+  if (isAdminRoute && (!isLoggedIn || !isStaff)) {
+    const loginUrl = new URL("/admin/login", nextUrl);
+    loginUrl.searchParams.set("callbackUrl", nextUrl.pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  if (isAdminLoginRoute && isLoggedIn && isStaff) {
+    return NextResponse.redirect(new URL("/admin/dashboard", nextUrl));
   }
 
   if (isAccountRoute && !isLoggedIn) {

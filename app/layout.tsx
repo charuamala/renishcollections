@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
-import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from "@/lib/constants";
 import "./globals.css";
 
@@ -70,10 +67,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <MobileBottomNav />
+        {children}
       </body>
     </html>
   );

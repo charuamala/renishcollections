@@ -3,10 +3,17 @@
 import { AuthError } from "next-auth";
 import { Prisma } from "@prisma/client";
 import { signIn } from "@/auth";
-import { signUpSchema, forgotPasswordSchema, resetPasswordSchema } from "@/schemas/auth.schema";
-import { createCustomer, createPasswordResetToken, resetPasswordWithToken } from "@/services/user.service";
+import { signUpSchema, forgotPasswordSchema, resetPasswordSchema, loginSchema } from "@/schemas/auth.schema";
+import {
+  createCustomer,
+  createPasswordResetToken,
+  resetPasswordWithToken,
+  findUserByEmail,
+  verifyPassword,
+} from "@/services/user.service";
 import { sendMail } from "@/lib/mailer";
 import { SITE_URL } from "@/lib/constants";
+import { STAFF_ROLES } from "@/lib/authorization";
 
 export interface AuthFormState {
   error?: string;
@@ -112,4 +119,40 @@ export async function resetPasswordAction(
     if (error instanceof Error) return { error: error.message };
     throw error;
   }
+}
+
+/**
+ * Separate from the customer `loginAction`. The role check happens *before*
+ * calling `signIn`, then reuses the same `redirectTo` mechanics as the
+ * customer login (proven to work) — checking role *after* `signIn(...,
+ * { redirect: false })` was tried first, but that mode never actually
+ * establishes the session for the Credentials provider in this next-auth
+ * beta (it silently no-ops instead of throwing), so the check needs to
+ * happen before signing in rather than after. Same error message either way
+ * so a wrong password and a non-staff account aren't distinguishable.
+ */
+export async function adminLoginAction(_prevState: AuthFormState, formData: FormData): Promise<AuthFormState> {
+  const parsed = loginSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Please check your details" };
+  }
+
+  const user = await findUserByEmail(parsed.data.email);
+  const isValid = user?.passwordHash ? await verifyPassword(parsed.data.password, user.passwordHash) : false;
+  if (!user || !isValid || !user.isActive || !STAFF_ROLES.includes(user.role)) {
+    return { error: "Invalid email or password" };
+  }
+
+  try {
+    await signIn("credentials", { ...parsed.data, redirectTo: "/admin/dashboard" });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return { error: "Invalid email or password" };
+    }
+    throw error; // NEXT_REDIRECT must propagate
+  }
+  return {};
 }
