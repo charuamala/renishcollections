@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+:root {
+  /* Brand palette — deep wine + warm gold on ivory. Premium, warm, Indian-fashion. */
+  --color-ivory: #faf6f0;
+  --color-cream: #f4ede2;
+  --color-maroon-50: #fbecee;
+  --color-maroon-100: #f3d3d8;
+  --color-maroon-400: #a13b48;
+  --color-maroon-600: #7a1f2b;
+  --color-maroon-700: #601722;
+  --color-maroon-900: #3d0e15;
+  --color-gold-300: #e7d3a3;
+  --color-gold-400: #cfa969;
+  --color-gold-500: #b8894a;
+  --color-gold-600: #96702f;
+  --color-charcoal: #241f1c;
+  --color-ink-600: #5a534d;
+  --color-ink-400: #8a8179;
+  --color-border: #e7ddd0;
+  --color-success: #2f6b3f;
+  --color-error: #b3261e;
+
+  --background: var(--color-ivory);
+  --foreground: var(--color-charcoal);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-ivory: var(--color-ivory);
+  --color-cream: var(--color-cream);
+  --color-maroon-50: var(--color-maroon-50);
+  --color-maroon-100: var(--color-maroon-100);
+  --color-maroon-400: var(--color-maroon-400);
+  --color-maroon-600: var(--color-maroon-600);
+  --color-maroon-700: var(--color-maroon-700);
+  --color-maroon-900: var(--color-maroon-900);
+  --color-gold-300: var(--color-gold-300);
+  --color-gold-400: var(--color-gold-400);
+  --color-gold-500: var(--color-gold-500);
+  --color-gold-600: var(--color-gold-600);
+  --color-charcoal: var(--color-charcoal);
+  --color-ink-600: var(--color-ink-600);
+  --color-ink-400: var(--color-ink-400);
+  --color-border: var(--color-border);
+  --color-success: var(--color-success);
+  --color-error: var(--color-error);
+
+  --font-display: var(--font-playfair);
+  --font-sans: var(--font-inter);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-maroon-600);
+  outline-offset: 2px;
+}
