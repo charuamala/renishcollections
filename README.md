@@ -17,13 +17,13 @@ This is under active development. Built and working end-to-end:
 - Cart (guest + logged-in, server-verified pricing, guest→user merge on login) and Wishlist (same pattern)
 - Customer account area: profile, orders (list), wishlist, addresses (CRUD), settings
 - Product reviews (customer submission, admin-approval flow, verified-purchase detection)
+- Admin panel at `/admin` (separate staff login, role-based access): dashboard with sales/order/stock stats, full product editor (images, video, variants, wholesale price, SEO — the fast daily-entry workflow the brief called for), category management, order status updates, customer list, coupon and banner CRUD, store settings, an audit log recording every admin mutation
 - Seed script with realistic demo data
 
 Not yet built — the next milestones:
 
-- Admin panel (dashboard, product/category/order/customer/coupon/banner management, CSV import, audit log UI)
-- Checkout flow and payment gateway integration (Razorpay/Stripe/Cashfree)
-- Order creation, status updates, tracking
+- Checkout flow and payment gateway integration (Razorpay/Stripe/Cashfree) — this is also why Orders/Customers currently show correctly-built but empty screens, since no orders can exist without checkout
+- CSV/Excel product import, audit log admin UI (the data is recorded, just not yet surfaced in a page)
 - `sitemap.xml`, `robots.ts`, PWA manifest
 - Analytics wiring (GA4/GTM)
 
@@ -93,7 +93,8 @@ The seed script creates a `SUPER_ADMIN` user from `SEED_ADMIN_EMAIL` /
 `admin@renishcollections.com` / `ChangeMe123!` if unset) and a
 `demo.customer@renishcollections.com` / `Demo1234!` test customer. **Change
 or remove these before ever seeding a production database** — the seed
-script is for local development and demos only.
+script is for local development and demos only. Log in to the admin panel
+at `/admin/login` with the `SEED_ADMIN_*` credentials.
 
 ### 5. Run the dev server
 
@@ -140,6 +141,29 @@ Visit [http://localhost:3000](http://localhost:3000).
   `/admin` and `/account`, but Server Actions and Route Handlers are not
   guaranteed to pass through it — every mutation independently re-checks the
   session via `lib/authorization.ts`.
+- **`app/` is split into `(storefront)` and `admin/` route groups.** The
+  customer-facing `Header`/`Footer`/`MobileBottomNav` live in
+  `app/(storefront)/layout.tsx`, not the root layout — the admin panel has
+  its own shell (`app/admin/(dashboard)/layout.tsx`) and must never inherit
+  the storefront chrome. `app/admin/(auth)/login` is a separate group so the
+  bare login screen doesn't get wrapped in the authenticated dashboard shell
+  either.
+- **`next-auth`'s `signIn(..., { redirect: false })` doesn't reliably
+  establish a session for the Credentials provider from a Server Action in
+  the current beta** (`next-auth@5.0.0-beta.32`) — it returns instead of
+  throwing, but no session cookie is set. The admin login therefore verifies
+  the staff role *before* calling `signIn`, then calls it the same way the
+  (working) customer login does, with `redirectTo`. Keep this in mind before
+  adding another flow that needs a role check around sign-in.
+- **A Prisma `Decimal` can't cross the Server→Client Component boundary as a
+  prop** — React's serialization doesn't support arbitrary class instances.
+  Every money field (`sellingPrice`, `grandTotal`, coupon amounts, tax
+  settings, …) is converted with `.toString()` at the page level before
+  being handed to a `"use client"` component; `formatPrice()` in
+  `lib/utils.ts` accepts the resulting string. If you add a new admin or
+  storefront client component that takes a Prisma record with a `Decimal`
+  field, serialize it the same way — the failure mode is a console error at
+  runtime, not a type error, so it's easy to miss.
 
 ## Deployment
 
