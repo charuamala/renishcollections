@@ -106,9 +106,14 @@ export function ImageUploader({
 export function MultiImageUploader({
   images,
   onChange,
+  label = "Product Images",
+  showPrimary = true,
 }: {
   images: string[];
   onChange: (images: string[]) => void;
+  label?: string;
+  /** Mark the first image as primary and offer "Make Primary" (product galleries). */
+  showPrimary?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -141,18 +146,18 @@ export function MultiImageUploader({
 
   return (
     <div>
-      <p className="mb-1.5 text-sm font-medium text-charcoal">Product Images</p>
+      <p className="mb-1.5 text-sm font-medium text-charcoal">{label}</p>
       <div className="flex flex-wrap gap-3">
         {images.map((url, index) => (
           <div key={url} className="relative h-24 w-24 overflow-hidden rounded-sm border border-border">
             <Image src={url} alt="" fill sizes="96px" className="object-cover" />
-            {index === 0 && (
+            {showPrimary && index === 0 && (
               <span className="absolute left-1 top-1 rounded-sm bg-maroon-600 px-1 text-[10px] text-white">
                 Primary
               </span>
             )}
             <div className="absolute inset-x-0 bottom-0 flex justify-between bg-black/50 px-1 py-0.5">
-              {index !== 0 ? (
+              {showPrimary && index !== 0 ? (
                 <button type="button" onClick={() => moveToFront(index)} className="text-[10px] text-white hover:underline">
                   Make Primary
                 </button>

@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { getFeaturedProducts, getNewArrivals, getBestSellers } from "@/services/product.service";
-import { getNavCategories } from "@/services/category.service";
+import { getSubcategoryCards } from "@/services/category.service";
 import { getActiveBanners } from "@/services/banner.service";
 import { getFeaturedReviews } from "@/services/review.service";
 import { getSiteSettings } from "@/services/settings.service";
@@ -18,7 +18,7 @@ export default async function HomePage() {
   const [heroBanners, categories, newArrivals, bestSellers, featured, reviews, settings, wishlistedIds] =
     await Promise.all([
       getActiveBanners("HOME_HERO"),
-      getNavCategories(),
+      getSubcategoryCards("sarees"),
       getNewArrivals(8),
       getBestSellers(8),
       getFeaturedProducts(8),
@@ -29,7 +29,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <HeroBanner banner={heroBanners[0] ?? null} />
+      <HeroBanner banners={heroBanners} />
 
       <CategoryGrid categories={categories} />
 
@@ -57,18 +57,21 @@ export default async function HomePage() {
         wishlistedIds={wishlistedIds}
       />
 
-      <WhyShopWithUs />
+      <WhyShopWithUs
+        deliveryTime={settings.deliveryTime}
+        contactPhone={settings.contactPhone}
+        supportHours={settings.supportHours}
+      />
 
       <ReviewsSection reviews={reviews} />
 
-      <InstagramSection instagramUrl={settings.instagramUrl ?? ""} />
+      {settings.instagramUrl && <InstagramSection instagramUrl={settings.instagramUrl} />}
 
       <section className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 lg:px-8">
         <h2 className="font-display text-2xl font-semibold text-charcoal">Online Saree Shopping, Simplified</h2>
         <p className="mt-3 text-sm leading-relaxed text-ink-600">
-          Renish Collections brings you silk sarees, cotton sarees, designer sarees and wedding sarees curated for
-          the modern Indian woman. Explore traditional weaves alongside contemporary prints, all shipped from our
-          collection to your doorstep with care.
+          Renish Collections brings you Banarasi tissue, dupion silk and soft silk sarees, chosen with care for
+          weddings, festivals and every occasion — from our Chennai collection to your doorstep.
         </p>
       </section>
     </>

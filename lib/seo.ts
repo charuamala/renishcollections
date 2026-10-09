@@ -29,7 +29,7 @@ export function productJsonLd(product: {
     name: product.name,
     description: product.description ?? undefined,
     sku: product.sku,
-    image: product.images.map((img) => img.url),
+    image: product.images.map((img) => (img.url.startsWith("http") ? img.url : `${SITE_URL}${img.url}`)),
     category: product.category.name,
     brand: { "@type": "Brand", name: "Renish Collections" },
     offers: {

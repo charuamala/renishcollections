@@ -39,6 +39,43 @@ export function SettingsForm({ settings }: { settings: SerializedSiteSettings })
         <Label htmlFor="address">Address</Label>
         <Input id="address" name="address" defaultValue={settings.address ?? ""} />
       </div>
+      <div>
+        <Label htmlFor="legalName">Legal Business Name</Label>
+        <Input id="legalName" name="legalName" defaultValue={settings.legalName ?? ""} />
+      </div>
+      <div>
+        <Label htmlFor="supportHours">Support Hours</Label>
+        <Input id="supportHours" name="supportHours" defaultValue={settings.supportHours ?? ""} placeholder="e.g. 24/7" />
+      </div>
+
+      <div>
+        <Label htmlFor="deliveryTime">Delivery Time</Label>
+        <Input id="deliveryTime" name="deliveryTime" defaultValue={settings.deliveryTime ?? ""} placeholder="e.g. 3–5 days" />
+        <p className="mt-1 text-xs text-ink-500">Shown on product pages, the FAQ and the home page. Leave blank to hide.</p>
+      </div>
+      <div>
+        <Label htmlFor="returnPolicy">Return Policy (one line)</Label>
+        <Input id="returnPolicy" name="returnPolicy" defaultValue={settings.returnPolicy ?? ""} />
+        <p className="mt-1 text-xs text-ink-500">Shown on product pages and the FAQ. Leave blank to hide.</p>
+      </div>
+      <label className="flex items-center gap-2 text-sm text-ink-600 sm:col-span-2">
+        <input type="checkbox" name="codAvailable" defaultChecked={settings.codAvailable} className="h-4 w-4" />
+        Cash on Delivery available
+      </label>
+
+      <div>
+        <Label htmlFor="grievanceOfficerName">Grievance Officer Name</Label>
+        <Input id="grievanceOfficerName" name="grievanceOfficerName" defaultValue={settings.grievanceOfficerName ?? ""} />
+      </div>
+      <div>
+        <Label htmlFor="grievanceOfficerEmail">Grievance Officer Email</Label>
+        <Input
+          id="grievanceOfficerEmail"
+          name="grievanceOfficerEmail"
+          type="email"
+          defaultValue={settings.grievanceOfficerEmail ?? ""}
+        />
+      </div>
 
       <div>
         <Label htmlFor="instagramUrl">Instagram URL</Label>

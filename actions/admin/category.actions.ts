@@ -24,6 +24,7 @@ function parseForm(formData: FormData) {
     slug: formData.get("slug"),
     description: formData.get("description"),
     imageUrl: formData.get("imageUrl"),
+    galleryImages: formData.getAll("galleryImages").filter((v) => typeof v === "string" && v.length > 0),
     parentId: formData.get("parentId"),
     displayOrder: formData.get("displayOrder") || 0,
     isPublished: formData.get("isPublished") === "on",

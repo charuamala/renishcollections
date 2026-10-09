@@ -51,6 +51,7 @@ export async function getWishlistProductsForUser(userId: string) {
               stock: true,
               images: { orderBy: { displayOrder: "asc" }, take: 1, select: { url: true, altText: true } },
               category: { select: { slug: true, parent: { select: { slug: true } } } },
+              _count: { select: { variants: true } },
             },
           },
         },
@@ -58,9 +59,10 @@ export async function getWishlistProductsForUser(userId: string) {
     },
   });
   return (
-    wishlist?.items.map((i) => ({
-      ...i.product,
-      href: productHref(i.product),
+    wishlist?.items.map(({ product: { _count, ...product } }) => ({
+      ...product,
+      hasVariants: _count.variants > 0,
+      href: productHref(product),
     })) ?? []
   );
 }

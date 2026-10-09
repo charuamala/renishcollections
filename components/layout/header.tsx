@@ -6,6 +6,7 @@ import { getCartItemCount } from "@/services/cart.service";
 import { SITE_NAME, STATIC_NAV_LINKS } from "@/lib/constants";
 import { SearchBar } from "@/components/products/search-bar";
 import { MobileMenu } from "@/components/layout/mobile-menu";
+import { Logo } from "@/components/layout/logo";
 
 export async function Header() {
   const [session, categories] = await Promise.all([auth(), getNavCategories()]);
@@ -22,8 +23,8 @@ export async function Header() {
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
         <MobileMenu navLinks={navLinks} />
 
-        <Link href="/" className="font-display text-xl font-semibold tracking-wide text-maroon-700 shrink-0">
-          {SITE_NAME}
+        <Link href="/" aria-label={`${SITE_NAME} home`} className="shrink-0">
+          <Logo eager className="h-9 sm:h-11" alt="" />
         </Link>
 
         <SearchBar className="hidden max-w-md flex-1 md:block" />

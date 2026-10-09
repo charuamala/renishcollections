@@ -16,7 +16,8 @@
   --color-gold-600: #96702f;
   --color-charcoal: #241f1c;
   --color-ink-600: #5a534d;
-  --color-ink-400: #8a8179;
+  --color-ink-500: #6b635c; /* muted text: 5.47:1 on ivory, 5.07:1 on cream */
+  --color-ink-400: #8a8179; /* decorative/disabled only — fails AA as text */
   --color-border: #e7ddd0;
   --color-success: #2f6b3f;
   --color-error: #b3261e;
@@ -43,10 +44,13 @@
   --color-gold-600: var(--color-gold-600);
   --color-charcoal: var(--color-charcoal);
   --color-ink-600: var(--color-ink-600);
+  --color-ink-500: var(--color-ink-500);
   --color-ink-400: var(--color-ink-400);
   --color-border: var(--color-border);
   --color-success: var(--color-success);
   --color-error: var(--color-error);
+
+  --radius-card: 6px;
 
   --font-display: var(--font-playfair);
   --font-sans: var(--font-inter);
@@ -72,4 +76,12 @@ h3,
 :focus-visible {
   outline: 2px solid var(--color-maroon-600);
   outline-offset: 2px;
+}
+
+/* Horizontal scrollers that are driven by their own controls (e.g. the home slider). */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

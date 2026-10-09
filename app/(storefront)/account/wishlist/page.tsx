@@ -30,6 +30,7 @@ export default async function WishlistPage() {
                 sellingPrice: product.sellingPrice.toString(),
                 originalPrice: product.originalPrice.toString(),
                 stock: product.stock,
+                hasVariants: product.hasVariants,
                 image: product.images.at(0) ?? null,
               }}
             />

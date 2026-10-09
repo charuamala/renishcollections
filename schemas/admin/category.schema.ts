@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { imageRefSchema as imageRef } from "@/schemas/image-ref";
 
 export const categoryAdminSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters"),
@@ -10,7 +11,8 @@ export const categoryAdminSchema = z.object({
     .optional()
     .or(z.literal("")),
   description: z.string().trim().optional().or(z.literal("")),
-  imageUrl: z.string().trim().url().optional().or(z.literal("")),
+  imageUrl: imageRef.optional().or(z.literal("")),
+  galleryImages: z.array(imageRef).max(12, "Up to 12 extra photos").default([]),
   parentId: z.string().trim().optional().or(z.literal("")),
   displayOrder: z.coerce.number().int().min(0).default(0),
   isPublished: z.boolean().default(true),

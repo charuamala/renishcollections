@@ -4,8 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { toggleWishlistForUser, toggleWishlistForGuest } from "@/services/wishlist.service";
-import { addItemForUser, addItemForGuest } from "@/services/cart.service";
-import { prisma } from "@/lib/prisma";
+import { addItemForUser, addItemForGuest, validateAddToCart } from "@/services/cart.service";
 
 const toggleSchema = z.object({ productId: z.string().min(1) });
 
@@ -27,9 +26,10 @@ export async function moveWishlistItemToCartAction(input: z.infer<typeof moveToC
   const { productId } = moveToCartSchema.parse(input);
   const session = await auth();
 
-  const product = await prisma.product.findUnique({ where: { id: productId }, select: { id: true, stock: true } });
-  if (!product || product.stock <= 0) {
-    return { success: false, error: "This product is currently out of stock" };
+  // Products with colour options can't be added without a choice — the wishlist card links to the product page instead.
+  const problem = await validateAddToCart(productId, null, 1);
+  if (problem) {
+    return { success: false, error: problem.message };
   }
 
   if (session?.user?.id) {

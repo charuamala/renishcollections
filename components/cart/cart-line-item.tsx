@@ -12,6 +12,7 @@ export interface SerializedCartLine {
   productId: string;
   variantId: string | null;
   name: string;
+  variantLabel: string | null;
   href: string;
   image: { url: string; altText: string | null } | null;
   quantity: number;
@@ -47,6 +48,7 @@ export function CartLineItem({ line }: { line: SerializedCartLine }) {
             <Link href={line.href} className="text-sm font-medium text-charcoal hover:underline">
               {line.name}
             </Link>
+            {line.variantLabel && <p className="mt-1 text-xs text-ink-600">{line.variantLabel}</p>}
             {!line.isAvailable && <p className="mt-1 text-xs text-error">Currently unavailable</p>}
           </div>
           <button type="button" onClick={remove} aria-label="Remove item" className="text-ink-400 hover:text-error">

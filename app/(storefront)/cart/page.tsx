@@ -41,6 +41,7 @@ export default async function CartPage() {
                 productId: line.productId,
                 variantId: line.variantId,
                 name: line.name,
+                variantLabel: line.variantLabel,
                 href: line.href,
                 image: line.image,
                 quantity: line.quantity,
@@ -71,10 +72,12 @@ export default async function CartPage() {
                 {cart.shippingTotal.equals(0) ? "Free" : formatPrice(cart.shippingTotal)}
               </dd>
             </div>
-            <div className="flex justify-between">
-              <dt className="text-ink-600">Tax</dt>
-              <dd className="font-medium text-charcoal">{formatPrice(cart.taxTotal)}</dd>
-            </div>
+            {cart.taxTotal.greaterThan(0) && (
+              <div className="flex justify-between">
+                <dt className="text-ink-600">GST</dt>
+                <dd className="font-medium text-charcoal">{formatPrice(cart.taxTotal)}</dd>
+              </div>
+            )}
             <div className="flex justify-between border-t border-border pt-2 text-base font-semibold text-charcoal">
               <dt>Total</dt>
               <dd>{formatPrice(cart.grandTotal)}</dd>
@@ -83,6 +86,7 @@ export default async function CartPage() {
           <Button href="/checkout" fullWidth size="lg" className="mt-6">
             Proceed to Checkout
           </Button>
+          <p className="mt-2 text-center text-xs text-ink-600">You&apos;ll send your order to us on WhatsApp.</p>
           <Link href="/shop" className="mt-3 block text-center text-xs text-ink-600 hover:underline">
             Continue Shopping
           </Link>

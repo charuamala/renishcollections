@@ -3,7 +3,7 @@
 import { useActionState, useState, useEffect } from "react";
 import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ImageUploader } from "@/components/admin/image-uploader";
+import { ImageUploader, MultiImageUploader } from "@/components/admin/image-uploader";
 import { createCategoryAction, updateCategoryAction, type CategoryFormState } from "@/actions/admin/category.actions";
 import type { Category } from "@prisma/client";
 
@@ -21,6 +21,7 @@ export function CategoryForm({
   const action = category ? updateCategoryAction.bind(null, category.id) : createCategoryAction;
   const [state, formAction, isPending] = useActionState(action, initialState);
   const [imageUrl, setImageUrl] = useState<string | null>(category?.imageUrl ?? null);
+  const [galleryImages, setGalleryImages] = useState<string[]>(category?.galleryImages ?? []);
 
   useEffect(() => {
     if (state.success) onSaved?.();
@@ -29,6 +30,9 @@ export function CategoryForm({
   return (
     <form action={formAction} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <input type="hidden" name="imageUrl" value={imageUrl ?? ""} />
+      {galleryImages.map((url) => (
+        <input key={url} type="hidden" name="galleryImages" value={url} />
+      ))}
 
       <div>
         <Label htmlFor="name">Name</Label>
@@ -75,6 +79,14 @@ export function CategoryForm({
 
       <div className="sm:col-span-2">
         <ImageUploader value={imageUrl} onChange={setImageUrl} label="Category Image" />
+        <p className="mt-1 text-xs text-ink-500">Shown on the category card. Portrait 3:4 works best (e.g. 960 × 1280).</p>
+      </div>
+
+      <div className="sm:col-span-2">
+        <MultiImageUploader images={galleryImages} onChange={setGalleryImages} label="More Photos" showPrimary={false} />
+        <p className="mt-1 text-xs text-ink-500">
+          The first photo appears when a shopper hovers the card; all of them show at the top of the category page.
+        </p>
       </div>
 
       <div>

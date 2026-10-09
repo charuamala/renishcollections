@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { WishlistButton } from "@/components/products/wishlist-button";
 import { AddToCartButton } from "@/components/products/add-to-cart-button";
+import { Button } from "@/components/ui/button";
 import { formatPrice, discountPercentage } from "@/lib/utils";
 import { productHref } from "@/lib/product-url";
 import type { PublicProduct } from "@/services/product.service";
@@ -13,7 +14,7 @@ export function ProductCard({
 }: {
   product: Pick<
     PublicProduct,
-    "id" | "name" | "slug" | "sellingPrice" | "originalPrice" | "stock" | "isNewArrival" | "isBestSeller" | "images" | "category"
+    "id" | "name" | "slug" | "sellingPrice" | "originalPrice" | "stock" | "isNewArrival" | "isBestSeller" | "images" | "category" | "variants"
   >;
   isWishlisted?: boolean;
 }) {
@@ -54,7 +55,14 @@ export function ProductCard({
         )}
 
         <div className="absolute inset-x-2 bottom-2 opacity-0 transition-opacity group-hover:opacity-100">
-          <AddToCartButton productId={product.id} disabled={!inStock} fullWidth size="sm" />
+          {product.variants.length > 0 ? (
+            // A colour has to be chosen first, so send the shopper to the product page.
+            <Button href={href} variant="primary" size="sm" fullWidth>
+              Choose Colour
+            </Button>
+          ) : (
+            <AddToCartButton productId={product.id} disabled={!inStock} fullWidth size="sm" />
+          )}
         </div>
       </div>
 

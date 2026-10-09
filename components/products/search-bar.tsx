@@ -13,7 +13,7 @@ export function SearchBar({ className, onNavigate }: { className?: string; onNav
     e.preventDefault();
     const trimmed = query.trim();
     if (!trimmed) return;
-    router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+    router.push(`/shop?q=${encodeURIComponent(trimmed)}`);
     onNavigate?.();
   }
 

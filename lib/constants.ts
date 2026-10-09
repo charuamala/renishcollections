@@ -25,12 +25,5 @@ export const ACCOUNT_NAV_LINKS = [
   { label: "Account Settings", href: "/account/settings" },
 ] as const;
 
-export const DEFAULT_SOCIAL_LINKS = {
-  instagram: "https://instagram.com/renishcollections",
-  whatsapp: "https://wa.me/910000000000",
-  facebook: "https://facebook.com/renishcollections",
-  youtube: "https://youtube.com/@renishcollections",
-};
-
 export const GUEST_CART_COOKIE = "rc_guest_cart";
 export const GUEST_WISHLIST_COOKIE = "rc_guest_wishlist";

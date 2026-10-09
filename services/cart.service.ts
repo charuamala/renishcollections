@@ -17,20 +17,40 @@ const LINE_SELECT = {
       sellingPrice: true,
       stock: true,
       status: true,
+      color: true,
       images: { orderBy: { displayOrder: "asc" as const }, take: 1, select: { url: true, altText: true } },
       category: { select: { slug: true, parent: { select: { slug: true } } } },
     },
   },
   variant: {
-    select: { id: true, sku: true, attributes: true, price: true, stock: true, isAvailable: true },
+    select: {
+      id: true,
+      sku: true,
+      attributes: true,
+      price: true,
+      stock: true,
+      isAvailable: true,
+      images: { orderBy: { displayOrder: "asc" as const }, take: 1, select: { url: true, altText: true } },
+    },
   },
 } as const;
+
+/** "Color: Maroon & Pink" from a variant's attributes JSON. */
+function describeVariant(attributes: unknown): string | null {
+  if (!attributes || typeof attributes !== "object") return null;
+  const parts = Object.entries(attributes as Record<string, unknown>)
+    .filter(([, value]) => typeof value === "string" && value.length > 0)
+    .map(([key, value]) => `${key.charAt(0).toUpperCase()}${key.slice(1)}: ${value}`);
+  return parts.length ? parts.join(" · ") : null;
+}
 
 export interface CartLineView {
   id: string; // cartItemId for logged-in users, `${productId}:${variantId ?? ""}` for guests
   productId: string;
   variantId: string | null;
   name: string;
+  /** Chosen options, e.g. "Color: Maroon & Pink". */
+  variantLabel: string | null;
   slug: string;
   href: string;
   image: { url: string; altText: string | null } | null;
@@ -78,6 +98,35 @@ async function upsertCartItem(cartId: string, productId: string, variantId: stri
     return prisma.cartItem.update({ where: { id: existing.id }, data: { quantity: { increment: quantity } } });
   }
   return prisma.cartItem.create({ data: { cartId, productId, variantId: null, quantity } });
+}
+
+export type AddToCartProblem = "UNAVAILABLE" | "VARIANT_REQUIRED" | "OUT_OF_STOCK";
+
+/**
+ * Server-side check before adding to a cart: the product must be published, a
+ * product with variants needs one of its own available variants, and stock must
+ * cover the requested quantity. Returns null when the add is allowed.
+ */
+export async function validateAddToCart(
+  productId: string,
+  variantId: string | null,
+  quantity: number,
+): Promise<{ problem: AddToCartProblem; message: string } | null> {
+  const product = await prisma.product.findFirst({
+    where: { id: productId, status: "PUBLISHED", deletedAt: null },
+    select: { stock: true, variants: { select: { id: true, stock: true, isAvailable: true } } },
+  });
+  if (!product) return { problem: "UNAVAILABLE", message: "This saree is no longer available" };
+
+  if (product.variants.length > 0) {
+    const variant = product.variants.find((v) => v.id === variantId);
+    if (!variant) return { problem: "VARIANT_REQUIRED", message: "Please choose a colour" };
+    if (!variant.isAvailable || variant.stock < quantity) return { problem: "OUT_OF_STOCK", message: "This colour is sold out" };
+    return null;
+  }
+
+  if (product.stock < quantity) return { problem: "OUT_OF_STOCK", message: "Sold out" };
+  return null;
 }
 
 export async function addItemForUser(userId: string, productId: string, variantId: string | null, quantity: number) {
@@ -161,9 +210,10 @@ async function hydrateGuestLines(guestLines: GuestCartLine[]): Promise<CartLineV
         productId: line.productId,
         variantId: line.variantId,
         name: product.name,
+        variantLabel: describeVariant(variant?.attributes) ?? (product.color ? `Color: ${product.color}` : null),
         slug: product.slug,
         href: productHref(product),
-        image: product.images.at(0) ?? null,
+        image: variant?.images.at(0) ?? product.images.at(0) ?? null,
         unitPrice,
         quantity: line.quantity,
         availableStock,
@@ -189,9 +239,10 @@ async function hydrateUserLines(userId: string): Promise<CartLineView[]> {
       productId: item.productId,
       variantId: item.variantId,
       name: item.product.name,
+      variantLabel: describeVariant(item.variant?.attributes) ?? (item.product.color ? `Color: ${item.product.color}` : null),
       slug: item.product.slug,
       href: productHref(item.product),
-      image: item.product.images.at(0) ?? null,
+      image: item.variant?.images.at(0) ?? item.product.images.at(0) ?? null,
       unitPrice,
       quantity: item.quantity,
       availableStock,

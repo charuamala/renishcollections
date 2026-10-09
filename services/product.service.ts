@@ -34,7 +34,10 @@ export const PUBLIC_PRODUCT_SELECT = {
   ogImageUrl: true,
   createdAt: true,
   category: { select: { id: true, name: true, slug: true, parent: { select: { slug: true } } } },
-  images: { orderBy: { displayOrder: "asc" as const }, select: { id: true, url: true, altText: true, isPrimary: true } },
+  images: {
+    orderBy: { displayOrder: "asc" as const },
+    select: { id: true, url: true, altText: true, isPrimary: true, variantId: true },
+  },
   videos: { select: { id: true, url: true, thumbnailUrl: true } },
   variants: {
     select: {
@@ -52,8 +55,12 @@ export const PUBLIC_PRODUCT_SELECT = {
 
 export type SortOption = "newest" | "price_asc" | "price_desc" | "popular" | "best_selling";
 
+/** Curated storefront collections backed by product flags / pricing. */
+export type ProductCollection = "new-arrivals" | "best-sellers" | "offers";
+
 export interface ShopFilters {
   categorySlug?: string;
+  collection?: ProductCollection;
   search?: string;
   subcategoryIds?: string[];
   minPrice?: number;
@@ -82,6 +89,13 @@ function sortToOrderBy(sort?: SortOption): Prisma.ProductOrderByWithRelationInpu
   }
 }
 
+/** JSON string filters are case-sensitive, so try the common casings of a search term. */
+function variantColourMatches(term: string) {
+  const lower = term.toLowerCase();
+  const title = lower.replace(/\b\w/g, (c) => c.toUpperCase());
+  return [...new Set([term, lower, title])];
+}
+
 export async function getShopProducts(filters: ShopFilters) {
   const page = Math.max(1, filters.page ?? 1);
   const pageSize = Math.min(60, Math.max(1, filters.pageSize ?? 24));
@@ -102,13 +116,24 @@ export async function getShopProducts(filters: ShopFilters) {
     where.categoryId = { in: filters.subcategoryIds };
   }
 
+  if (filters.collection === "new-arrivals") where.isNewArrival = true;
+  if (filters.collection === "best-sellers") where.isBestSeller = true;
+  // A product is on offer when its original price is higher than what it sells for.
+  if (filters.collection === "offers") where.originalPrice = { gt: prisma.product.fields.sellingPrice };
+
   if (filters.search) {
+    const term = filters.search.trim();
     where.OR = [
-      { name: { contains: filters.search, mode: "insensitive" } },
-      { sku: { contains: filters.search, mode: "insensitive" } },
-      { tags: { has: filters.search.toLowerCase() } },
-      { fabric: { contains: filters.search, mode: "insensitive" } },
-      { color: { contains: filters.search, mode: "insensitive" } },
+      { name: { contains: term, mode: "insensitive" } },
+      { sku: { contains: term, mode: "insensitive" } },
+      { tags: { has: term.toLowerCase() } },
+      { fabric: { contains: term, mode: "insensitive" } },
+      { color: { contains: term, mode: "insensitive" } },
+      { category: { name: { contains: term, mode: "insensitive" } } },
+      // Colour options live on variants, e.g. "Purple & Grey".
+      ...variantColourMatches(term).map((value) => ({
+        variants: { some: { attributes: { path: ["color"], string_contains: value } } },
+      })),
     ];
   }
 

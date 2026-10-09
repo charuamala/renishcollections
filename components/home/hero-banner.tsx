@@ -1,40 +1,50 @@
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import type { Banner } from "@prisma/client";
+import { Button } from "@/components/ui/button";
+import { HeroSlider } from "@/components/home/hero-slider";
 
-export function HeroBanner({ banner }: { banner: Banner | null }) {
-  if (banner) {
-    return (
-      <section className="relative h-[60vh] min-h-[420px] w-full overflow-hidden bg-maroon-900 sm:h-[70vh]">
-        <Image src={banner.imageUrl} alt={banner.title} fill priority className="object-cover opacity-90" />
-        <div className="absolute inset-0 flex items-center bg-gradient-to-r from-charcoal/60 via-charcoal/20 to-transparent">
-          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-            <h1 className="font-display max-w-xl text-4xl font-semibold text-white sm:text-5xl">{banner.title}</h1>
-            {banner.linkUrl && (
-              <Button href={banner.linkUrl} variant="gold" size="lg" className="mt-6">
-                Shop Now
-              </Button>
-            )}
-          </div>
+/** Home hero: the admin-managed banner slider, followed by the page headline and main actions. */
+export function HeroBanner({ banners }: { banners: Banner[] }) {
+  return (
+    <>
+      <HeroSlider
+        slides={banners.map((b) => ({
+          id: b.id,
+          title: b.title,
+          imageUrl: b.imageUrl,
+          mobileImageUrl: b.mobileImageUrl,
+          linkUrl: b.linkUrl,
+        }))}
+      />
+
+      <section
+        className={
+          banners.length > 0
+            ? "mx-auto max-w-3xl px-4 pb-4 pt-8 text-center sm:px-6 sm:pt-10"
+            : "bg-gradient-to-br from-maroon-900 via-maroon-700 to-maroon-600 px-4 py-20 text-center sm:py-28"
+        }
+      >
+        <h1
+          className={`font-display text-3xl font-semibold sm:text-4xl lg:text-5xl ${banners.length > 0 ? "text-charcoal" : "text-white"}`}
+        >
+          Elegance Woven for Every Occasion
+        </h1>
+        <p className={`mt-3 text-base sm:text-lg ${banners.length > 0 ? "text-ink-600" : "text-white/85"}`}>
+          Discover timeless sarees crafted in exquisite fabrics.
+        </p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Button href="/sarees" variant={banners.length > 0 ? "primary" : "gold"} size="lg">
+            Shop Sarees
+          </Button>
+          <Button
+            href="/new-arrivals"
+            variant="secondary"
+            size="lg"
+            className={banners.length > 0 ? "" : "border-white text-white hover:bg-white/10"}
+          >
+            New Arrivals
+          </Button>
         </div>
       </section>
-    );
-  }
-
-  return (
-    <section className="relative flex h-[60vh] min-h-[420px] w-full items-center overflow-hidden bg-gradient-to-br from-maroon-900 via-maroon-700 to-maroon-600 sm:h-[70vh]">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-gold-300">New Season Edit</p>
-        <h1 className="font-display mt-3 max-w-xl text-4xl font-semibold text-white sm:text-5xl">
-          Timeless Sarees, Handpicked for You
-        </h1>
-        <p className="mt-4 max-w-md text-white/80">
-          Silk, cotton and designer sarees sourced with care — fresh arrivals every week.
-        </p>
-        <Button href="/shop" variant="gold" size="lg" className="mt-6">
-          Shop Sarees
-        </Button>
-      </div>
-    </section>
+    </>
   );
 }

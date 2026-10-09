@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { imageRefSchema } from "@/schemas/image-ref";
 
 export const productVariantInputSchema = z.object({
   id: z.string().optional(), // present when editing an existing variant
@@ -51,7 +52,7 @@ export const productAdminSchema = z
   canonicalUrl: z.string().trim().optional().or(z.literal("")),
   ogImageUrl: z.string().trim().url().optional().or(z.literal("")),
 
-  images: z.array(z.string().url()).default([]),
+  images: z.array(imageRefSchema).default([]),
   videoUrl: z.string().trim().url().optional().or(z.literal("")),
   variants: z.array(productVariantInputSchema).default([]),
   })

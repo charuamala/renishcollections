@@ -1,9 +1,10 @@
 import { z } from "zod";
+import { imageRefSchema } from "@/schemas/image-ref";
 
 export const bannerAdminSchema = z.object({
   title: z.string().trim().min(2, "Title must be at least 2 characters"),
-  imageUrl: z.string().trim().url("Upload an image first"),
-  mobileImageUrl: z.string().trim().url().optional().or(z.literal("")),
+  imageUrl: imageRefSchema.refine((v) => v.length > 0, "Upload an image first"),
+  mobileImageUrl: imageRefSchema.optional().or(z.literal("")),
   linkUrl: z.string().trim().optional().or(z.literal("")),
   placement: z.enum(["HOME_HERO", "HOME_PROMO", "CATEGORY_TOP", "MOBILE_STRIP"]),
   displayOrder: z.coerce.number().int().min(0).default(0),

@@ -10,6 +10,7 @@ import {
   updateItemQuantityForGuest,
   removeItemForUser,
   removeItemForGuest,
+  validateAddToCart,
 } from "@/services/cart.service";
 
 const addToCartSchema = z.object({
@@ -20,6 +21,10 @@ const addToCartSchema = z.object({
 
 export async function addToCartAction(input: z.infer<typeof addToCartSchema>) {
   const { productId, variantId, quantity } = addToCartSchema.parse(input);
+
+  const problem = await validateAddToCart(productId, variantId, quantity);
+  if (problem) return { success: false as const, error: problem.message };
+
   const session = await auth();
 
   if (session?.user?.id) {
@@ -29,7 +34,7 @@ export async function addToCartAction(input: z.infer<typeof addToCartSchema>) {
   }
 
   revalidatePath("/cart");
-  return { success: true };
+  return { success: true as const };
 }
 
 const updateQuantitySchema = z.object({

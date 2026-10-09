@@ -12,6 +12,7 @@ import { getWishlistProductIdsForUser } from "@/services/wishlist.service";
 import { CategoryListing } from "@/components/shop/category-listing";
 import { ProductDetail } from "@/components/products/product-detail";
 import { breadcrumbJsonLd, productJsonLd } from "@/lib/seo";
+import { getSiteSettings } from "@/services/settings.service";
 import { productHref } from "@/lib/product-url";
 
 async function resolveSubcategory(categorySlug: string, slug: string) {
@@ -25,10 +26,16 @@ export async function generateMetadata({ params }: PageProps<"/[categorySlug]/[s
 
   const subcategory = await resolveSubcategory(categorySlug, slug);
   if (subcategory) {
+    // Root layout's title template appends "| Renish Collections".
+    const title = subcategory.seoTitle || subcategory.name;
+    const description =
+      subcategory.seoDescription ||
+      `Explore elegant ${subcategory.name} at Renish Collections. Discover beautiful designs for weddings, festivals and special occasions.`;
     return {
-      title: subcategory.seoTitle || subcategory.name,
-      description: subcategory.seoDescription || subcategory.description || undefined,
+      title,
+      description,
       alternates: { canonical: subcategory.canonicalUrl || `/${categorySlug}/${slug}` },
+      openGraph: { title, description, images: subcategory.imageUrl ? [subcategory.imageUrl] : undefined },
     };
   }
 
@@ -58,7 +65,7 @@ export default async function CategoryOrProductPage({ params }: PageProps<"/[cat
     const wishlistedIds = session?.user?.id ? await getWishlistProductIdsForUser(session.user.id) : [];
     const breadcrumb = breadcrumbJsonLd([
       { name: "Home", url: "/" },
-      { name: subcategory.parent!.slug, url: `/${categorySlug}` },
+      { name: subcategory.parent!.name, url: `/${categorySlug}` },
       { name: subcategory.name, url: `/${categorySlug}/${slug}` },
     ]);
 
@@ -70,6 +77,12 @@ export default async function CategoryOrProductPage({ params }: PageProps<"/[cat
           title={subcategory.name}
           description={subcategory.description}
           subcategories={[]}
+          breadcrumbs={[
+            { name: "Home", href: "/" },
+            { name: subcategory.parent!.name, href: `/${categorySlug}` },
+            { name: subcategory.name, href: `/${categorySlug}/${slug}` },
+          ]}
+          bannerImages={subcategory.imageUrl ? [subcategory.imageUrl, ...subcategory.galleryImages] : []}
           basePath={`/${categorySlug}/${slug}`}
           wishlistedIds={wishlistedIds}
         />
@@ -92,11 +105,12 @@ export default async function CategoryOrProductPage({ params }: PageProps<"/[cat
     redirect(canonicalHref);
   }
 
-  const [relatedProducts, reviews, ratingSummary, wishlistedIds] = await Promise.all([
+  const [relatedProducts, reviews, ratingSummary, wishlistedIds, settings] = await Promise.all([
     getRelatedProducts(product.id, product.category.id),
     getApprovedReviewsForProduct(product.id),
     getProductRatingSummary(product.id),
     session?.user?.id ? getWishlistProductIdsForUser(session.user.id) : Promise.resolve([]),
+    getSiteSettings(),
   ]);
 
   const breadcrumb = breadcrumbJsonLd([
@@ -127,6 +141,13 @@ export default async function CategoryOrProductPage({ params }: PageProps<"/[cat
         ratingSummary={ratingSummary}
         isLoggedIn={!!session?.user}
         isWishlisted={wishlistedIds.includes(product.id)}
+        storeFacts={{
+          deliveryTime: settings.deliveryTime,
+          returnPolicy: settings.returnPolicy,
+          codAvailable: settings.codAvailable,
+          contactPhone: settings.contactPhone,
+          whatsappUrl: settings.whatsappUrl,
+        }}
       />
     </>
   );

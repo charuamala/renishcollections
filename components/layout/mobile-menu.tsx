@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
+import { Logo } from "@/components/layout/logo";
 
 export function MobileMenu({ navLinks }: { navLinks: { label: string; href: string }[] }) {
   const [open, setOpen] = useState(false);
@@ -28,14 +29,17 @@ export function MobileMenu({ navLinks }: { navLinks: { label: string; href: stri
             onClick={() => setOpen(false)}
           />
           <nav className="flex h-full w-72 flex-col gap-1 bg-ivory p-6 shadow-xl">
-            <button
-              type="button"
-              aria-label="Close menu"
-              onClick={() => setOpen(false)}
-              className="mb-4 ml-auto flex h-9 w-9 items-center justify-center"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            <div className="mb-4 flex items-center justify-between">
+              <Logo className="h-9" />
+              <button
+                type="button"
+                aria-label="Close menu"
+                onClick={() => setOpen(false)}
+                className="flex h-10 w-10 items-center justify-center"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
             {navLinks.map((link) => (
               <Link
                 key={link.href}

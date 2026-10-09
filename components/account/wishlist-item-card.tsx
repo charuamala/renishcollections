@@ -15,6 +15,7 @@ interface WishlistProduct {
   sellingPrice: string;
   originalPrice: string;
   stock: number;
+  hasVariants: boolean;
   image: { url: string; altText: string | null } | null;
 }
 
@@ -48,16 +49,22 @@ export function WishlistItemCard({ product }: { product: WishlistProduct }) {
         <span className="font-semibold text-charcoal">{formatPrice(product.sellingPrice)}</span>
         {discount > 0 && <span className="text-ink-400 line-through">{formatPrice(product.originalPrice)}</span>}
       </div>
-      <Button
-        type="button"
-        size="sm"
-        variant="secondary"
-        className="mt-2"
-        disabled={!inStock || isPending}
-        onClick={() => startTransition(async () => { await moveWishlistItemToCartAction({ productId: product.id }); })}
-      >
-        {inStock ? "Move to Cart" : "Out of Stock"}
-      </Button>
+      {product.hasVariants ? (
+        <Button href={product.href} size="sm" variant="secondary" className="mt-2">
+          Choose Colour
+        </Button>
+      ) : (
+        <Button
+          type="button"
+          size="sm"
+          variant="secondary"
+          className="mt-2"
+          disabled={!inStock || isPending}
+          onClick={() => startTransition(async () => { await moveWishlistItemToCartAction({ productId: product.id }); })}
+        >
+          {inStock ? "Move to Cart" : "Out of Stock"}
+        </Button>
+      )}
     </div>
   );
 }

@@ -181,16 +181,18 @@ model Address {
 // ---------------------------------------------------------------------------
 
 model Category {
-  id           String     @id @default(cuid())
-  name         String
-  slug         String     @unique
-  description  String?
-  imageUrl     String?
-  parentId     String?
-  parent       Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  children     Category[] @relation("CategoryTree")
-  displayOrder Int        @default(0)
-  isPublished  Boolean    @default(true)
+  id            String     @id @default(cuid())
+  name          String
+  slug          String     @unique
+  description   String?
+  imageUrl      String?
+  // Extra photos after the card image: [0] is the card's hover image, the rest feed the category page banner.
+  galleryImages String[]   @default([])
+  parentId      String?
+  parent        Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children      Category[] @relation("CategoryTree")
+  displayOrder  Int        @default(0)
+  isPublished   Boolean    @default(true)
 
   seoTitle       String?
   seoDescription String?
@@ -647,10 +649,10 @@ model AuditLog {
 }
 
 model NewsletterSubscriber {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  isSubscribed Boolean @default(true)
-  createdAt   DateTime @default(now())
+  id           String   @id @default(cuid())
+  email        String   @unique
+  isSubscribed Boolean  @default(true)
+  createdAt    DateTime @default(now())
 }
 
 // ---------------------------------------------------------------------------
@@ -666,6 +668,17 @@ model SiteSettings {
   contactPhone   String?
   whatsappNumber String?
   address        String?
+  legalName      String?
+  supportHours   String?
+
+  // Consumer Protection (E-Commerce) Rules 2020: shown in the footer and on policy pages.
+  grievanceOfficerName  String?
+  grievanceOfficerEmail String?
+
+  // Customer-facing facts, shown on product pages, FAQ and home. Hidden when blank — never invented.
+  deliveryTime String? // e.g. "3–5 days"
+  returnPolicy String? // one-line summary
+  codAvailable Boolean @default(false)
 
   instagramUrl String?
   facebookUrl  String?

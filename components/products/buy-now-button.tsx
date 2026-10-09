@@ -26,8 +26,8 @@ export function BuyNowButton({
       disabled={disabled || isPending}
       onClick={() => {
         startTransition(async () => {
-          await addToCartAction({ productId, variantId, quantity: 1 });
-          router.push("/cart");
+          const result = await addToCartAction({ productId, variantId, quantity: 1 });
+          if (result.success) router.push("/cart");
         });
       }}
     >
